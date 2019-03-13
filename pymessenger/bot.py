@@ -21,7 +21,7 @@ class Bot(object):
         self.api_password = api_password
         self.access_token = self.login(api_username, api_password)
 
-        logger.info("__init__ -> access_token:" , self.access_token)
+        logger.info(f"__init__ -> access_token: {self.access_token}")
 
 
     @property
@@ -54,7 +54,7 @@ class Bot(object):
             headers={'Content-Type': 'application/json'})
         result = response.json()
 
-        logger.debug("login -> result:", result)
+        logger.debug(f"login -> result: {result}")
 
         return result
 

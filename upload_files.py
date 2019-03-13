@@ -49,7 +49,7 @@ def set_sharing_permission(files, service):
 		service.permissions().create(fileId=files['id'], body=new_permission).execute()
 		return files['webContentLink']
 	except :
-		logger.error("Unexpected error: ", sys.exc_info())
+		logger.error(f"Unexpected error: {sys.exc_info()}")
 		return ''
 
 
@@ -64,7 +64,7 @@ def save_get_file(file, file_name):
 		f.close()
 
 	except:
-		logger.error("Unexpected error: ", sys.exc_info()[0])
+		logger.error(f"Unexpected error: {sys.exc_info()[0]}")
 		raise
 
 	return complete_name

@@ -82,7 +82,7 @@ def receive_message():
 	                       'media_name': file_name, 'content': base64_string,
 	                       'message_id': message.get('id')}
 
-				logger.debug("receive_message -> message -> file -> payload:", payload)
+				logger.debug(f"receive_message -> message -> file -> payload: {payload}")
 
 				response = send_omni_message(payload)
 
@@ -93,11 +93,11 @@ def receive_message():
 				           'send_date': frmt_date, 'content': message.get('text').get('body'),
 				           'message_id': message.get('id'), 'plataform_name': 'whatsapp_business'}
 
-				logger.debug("receive_message -> message -> text -> payload:", payload)
+				logger.debug(f"receive_message -> message -> text -> payload: {payload}")
 
 				response = send_omni_message(payload)
 
-				logger.debug("receive_message -> message -> file -> response:", response)
+				logger.debug(f"receive_message -> message -> file -> response: {response}")
 
 	elif "statuses" in req_data:
 		# TODO
@@ -190,11 +190,11 @@ def send_text_message(omni_message):
 	                           "media_id": media_id,
 	                           "recipient_type": "individual"})
 
-	logger.debug("send_text_message -> message:", message)
+	logger.debug(f"send_text_message -> message: {message}")
 
 	response = bot.send_raw(message)
 
-	logger.debug("send_text_message -> response:", response)
+	logger.debug(f"send_text_message -> response: {response}")
 
 	return response
 
@@ -207,11 +207,11 @@ def send_hsm_message(omni_message):
 							   "hsm": omni_message["hsm"],
 	                           "recipient_type": "individual"})
 
-	logger.debug("send_hsm_message -> message:", message)
+	logger.debug(f"send_hsm_message -> message: {message}")
 
 	response = bot.send_raw(message)
 
-	logger.debug("send_hsm_message -> response:", response)
+	logger.debug(f"send_hsm_message -> response: {response}")
 
 	return bot.send_raw(message)
 
@@ -234,11 +234,11 @@ def send_attachment_message(omni_message):
 	if "caption" in omni_message:
 		message["message"].update({"caption": omni_message["caption"]})
 
-	logger.debug("send_attachment_message -> message:", message)
+	logger.debug(f"send_attachment_message -> message: {message}")
 
 	response = bot.send_raw(message)
 
-	logger.debug("send_attachment_message -> response:", response)
+	logger.debug(f"send_attachment_message -> response: {response}")
 
 	return response
 
