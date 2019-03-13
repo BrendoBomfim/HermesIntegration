@@ -6,7 +6,14 @@ from flask import Flask, request
 from pymessenger.bot import Bot
 import upload_files
 import json
+import logging
 
+#Number used on Hermes
+recipient = 558588886522
+
+logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', level=logging.DEBUG, filename= "logs/" + str(recipient) + '_hermes_integration.log',
+                    filemode='w', datefmt='%d/%m/%Y %H:%M:%S')
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 #Hermes credentials
@@ -17,8 +24,7 @@ media_id = "ffbff03b-d193-45ac-a28c-625568e9cd86"
 omni_link = "http://localhost"
 omni_port = "3000"
 
-#Number used on Hermes
-recipient = 558588886522
+
 
 bot = Bot(api_username, api_password)
 
@@ -76,20 +82,29 @@ def receive_message():
 	                       'media_name': file_name, 'content': base64_string,
 	                       'message_id': message.get('id')}
 
+				logger.debug("receive_message -> message -> file -> payload:", payload)
+
 				response = send_omni_message(payload)
+
+				logger.debug("receive_message -> message -> file -> response:", response)
 
 			elif "text" in message:
 				payload = {'sender': message.get('from'), 'recipient': recipient,
 				           'send_date': frmt_date, 'content': message.get('text').get('body'),
 				           'message_id': message.get('id'), 'plataform_name': 'whatsapp_business'}
+
+				logger.debug("receive_message -> message -> text -> payload:", payload)
+
 				response = send_omni_message(payload)
+
+				logger.debug("receive_message -> message -> file -> response:", response)
 
 	elif "statuses" in req_data:
 		# TODO
-		print("status")
-		print(req_data["statuses"])
+		logger.info("status")
+		logger.info(req_data["statuses"])
 	else:
-		print(req_data)
+		logger.info(req_data["statuses"])
 	return response
 
 @app.route("/message", methods=['POST'])
@@ -174,7 +189,14 @@ def send_text_message(omni_message):
 	                           "text": omni_message["content"],
 	                           "media_id": media_id,
 	                           "recipient_type": "individual"})
-	return bot.send_raw(message)
+
+	logger.debug("send_text_message -> message:", message)
+
+	response = bot.send_raw(message)
+
+	logger.debug("send_text_message -> response:", response)
+
+	return response
 
 def send_hsm_message(omni_message):
 	message = json.loads('{}')
@@ -184,6 +206,13 @@ def send_hsm_message(omni_message):
 							   "media_id": media_id,
 							   "hsm": omni_message["hsm"],
 	                           "recipient_type": "individual"})
+
+	logger.debug("send_hsm_message -> message:", message)
+
+	response = bot.send_raw(message)
+
+	logger.debug("send_hsm_message -> response:", response)
+
 	return bot.send_raw(message)
 
 def send_attachment_message(omni_message):
@@ -205,7 +234,13 @@ def send_attachment_message(omni_message):
 	if "caption" in omni_message:
 		message["message"].update({"caption": omni_message["caption"]})
 
-	return bot.send_raw(message)
+	logger.debug("send_attachment_message -> message:", message)
+
+	response = bot.send_raw(message)
+
+	logger.debug("send_attachment_message -> response:", response)
+
+	return response
 
 def get_type(myme):
 	type = myme.split('/')[0]

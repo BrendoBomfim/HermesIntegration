@@ -2,7 +2,11 @@ import json
 import requests
 import flask
 
+import logging
+
 from pymessenger.utils import AttrsEncoder
+
+logger = logging.getLogger(__name__)
 
 class Bot(object):
     def __init__(self,
@@ -16,7 +20,9 @@ class Bot(object):
         self.api_username = api_username
         self.api_password = api_password
         self.access_token = self.login(api_username, api_password)
-        print(self.access_token)
+
+        logger.info("__init__ -> access_token:" , self.access_token)
+
 
     @property
     def auth_args(self):
@@ -47,6 +53,9 @@ class Bot(object):
             data=json.dumps(payload, cls=AttrsEncoder),
             headers={'Content-Type': 'application/json'})
         result = response.json()
+
+        logger.debug("login -> result:", result)
+
         return result
 
 

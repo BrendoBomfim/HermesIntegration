@@ -6,6 +6,9 @@ from apiclient.http import MediaFileUpload
 import sys
 import base64
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = 'https://www.googleapis.com/auth/drive'
@@ -46,7 +49,7 @@ def set_sharing_permission(files, service):
 		service.permissions().create(fileId=files['id'], body=new_permission).execute()
 		return files['webContentLink']
 	except :
-		print ("Unexpected error:", sys.exc_info())
+		logger.error("Unexpected error: ", sys.exc_info())
 		return ''
 
 
@@ -61,7 +64,7 @@ def save_get_file(file, file_name):
 		f.close()
 
 	except:
-		print("Unexpected error:", sys.exc_info()[0])
+		logger.error("Unexpected error: ", sys.exc_info()[0])
 		raise
 
 	return complete_name
