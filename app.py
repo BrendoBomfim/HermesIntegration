@@ -128,10 +128,10 @@ def on_omni_message():
 		      The sucess of error from omni request
 		"""
 	req_data = request.get_json()
-
+	
 	if req_data.get('media_type'):
 		return send_attachment_message(req_data)
-	elif req_data.get('hsm'):
+	elif req_data.get('message'):
 		return send_hsm_message(req_data)
 	else:
 		return send_text_message(req_data)
@@ -199,21 +199,21 @@ def send_text_message(omni_message):
 	return response
 
 def send_hsm_message(omni_message):
-	message = json.loads('{}')
-	message["message"] = {}
-	message["message"].update({"to": format_phone(omni_message["recipient"]),
-	                           "type": omni_message["media_type"],
-							   "media_id": media_id,
-							   "hsm": omni_message["hsm"],
-	                           "recipient_type": "individual"})
+	# message = json.loads('{}')
+	# message["message"] = {}
+	# message["message"].update({"to": format_phone(omni_message["recipient"]),
+	#                            "type": omni_message["media_type"],
+	# 						   "media_id": media_id,
+	# 						   "hsm": omni_message["hsm"],
+	#                            "recipient_type": "individual"})
+	#
+	# logger.debug(f"send_hsm_message -> message: {message}")
 
-	logger.debug(f"send_hsm_message -> message: {message}")
-
-	response = bot.send_raw(message)
+	response = bot.send_raw(omni_message)
 
 	logger.debug(f"send_hsm_message -> response: {response}")
 
-	return bot.send_raw(message)
+	return response
 
 def send_attachment_message(omni_message):
 	message = json.loads('{}')
