@@ -108,7 +108,8 @@ def receive_message():
 		logger.info("status")
 		logger.info(req_data["statuses"])
 	else:
-		logger.info(req_data["statuses"])
+		logger.info("Not handled")
+		logger.info(req_data)
 	return response
 
 
