@@ -65,6 +65,11 @@ def receive_message():
 	if req_data.get('messages'):
 		messages = req_data["messages"]
 		for message in messages:
+			sender = message.get('from')
+
+			if (len(sender) == 12):
+				sender = sender[0:4] + '9' + sender[4:12]
+
 			# For any media file, there is always going to be one of those
 			if "image" in message or "voice" in message or "document" in message:
 				file = message.get('image') or message.get('voice') or message.get('document')
@@ -75,7 +80,7 @@ def receive_message():
 
 				base64_string = download_file(url_name)
 
-				payload = {'sender': message.get('from'), 'recipient': recipient,
+				payload = {'sender': sender, 'recipient': recipient,
 						   'send_date': frmt_date, 'media': 'media',
 						   'media_type': message.get('type'), 'plataform_name': 'whatsapp_business',
 						   'media_name': file_name, 'content': base64_string,
@@ -88,7 +93,7 @@ def receive_message():
 				logger.debug("receive_message -> message -> file -> response:", response)
 
 			elif "text" in message:
-				payload = {'sender': message.get('from'), 'recipient': recipient,
+				payload = {'sender': sender, 'recipient': recipient,
 						   'send_date': frmt_date, 'content': message.get('text').get('body'),
 						   'message_id': message.get('id'), 'plataform_name': 'whatsapp_business'}
 
