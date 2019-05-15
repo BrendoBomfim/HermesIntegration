@@ -37,6 +37,14 @@ def receive_message():
 
 		Modification Date:
 			07/03/2019
+		
+		Now send the status.
+
+		Author:
+			Brendo Bomfim
+
+		Modification Date:
+			15/05/2019
 
 		Expects the JSON to be like:
 		{
@@ -53,6 +61,23 @@ def receive_message():
 			],
 			"media_id": "xxx-xxx-xxxx"
 		}
+		Or
+		{
+			"media_id": "ffbff03b-d193-45ac-a28c-625568e9cd86",
+			"contacts": {
+				"status": "invalid",
+				"msg_id": "644df3e9-dde5-4337-bed2-a4e73e7d39b6"
+			}
+		}
+		Or
+		[
+			{
+				"status": "delivered",
+				"timestamp": "1557865064",
+				"recipient_id": "558596361001",
+				"id": "7318b99d-8813-45b1-a7ed-5cb4265da49b"
+			}
+		]
 
 		Returns:
 		  The sucess of error from omni request
@@ -90,7 +115,7 @@ def receive_message():
 
 				response = send_omni_message(payload)
 
-				logger.debug("receive_message -> message -> file -> response:", response)
+				logger.debug(f"receive_message -> message -> file -> response: {response}" )
 
 			elif "text" in message:
 				payload = {'sender': sender, 'recipient': recipient,
@@ -104,9 +129,25 @@ def receive_message():
 				logger.debug(f"receive_message -> message -> file -> response: {response}")
 
 	elif "statuses" in req_data:
-		# TODO
-		logger.info("status")
-		logger.info(req_data["statuses"])
+		statuses = req_data["statuses"]
+		for status in statuses:
+			payload = {'status': status.get('status'), 'id': status.get('id')}
+
+			logger.debug(f"receive_message -> message -> statuses -> payload: {payload}")
+
+			response = send_omni_status(payload)
+
+			logger.debug(f"receive_message -> message -> statuses -> response: {response}")
+
+	elif "media_id" in req_data:
+		payload = {'status': req_data.get('contacts').get('status'), 'id': req_data.get('contacts').get('msg_id')}
+
+		logger.debug(f"receive_message -> message -> media_id -> payload: {payload}")
+
+		response = send_omni_status(payload)
+
+		logger.debug(f"receive_message -> message -> media_id -> response: {response}")
+		
 	else:
 		logger.info("Not handled")
 		logger.info(req_data)
@@ -181,6 +222,32 @@ def send_omni_message(payload):
 					  The sucess of error from the request made to omni
 		"""
 	request_endpoint = omni_link + ':' + omni_port + '/api/message'
+	response = requests.post(
+		request_endpoint,
+		data=json.dumps(payload),
+		headers={'Content-Type': 'application/json'})
+	return response.content
+
+def send_omni_status(payload):
+	"""Sends the status payload to Omni.
+
+					Author:
+						Brendo Bomfim
+
+					Modification Date:
+						15/05/2019
+
+					Args:
+						payload: the message to be sendo to omni. e.g:
+						{
+							"status": "invalid",
+							"id": 644df3e9-dde5-4337-bed2-a4e73e7d39b6
+							
+						}
+					Returns:
+					  The sucess of error from the request made to omni
+		"""
+	request_endpoint = omni_link + ':' + omni_port + '/dialer/status'
 	response = requests.post(
 		request_endpoint,
 		data=json.dumps(payload),
