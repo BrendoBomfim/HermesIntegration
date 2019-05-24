@@ -208,6 +208,12 @@ def send_omni_message(payload):
 					Modification Date:
 						07/03/2019
 
+					Changed the route.
+					Author:
+						Brendo Bomfim
+					Modification Date:
+						24/05/2019
+
 					Args:
 						payload: the message to be sendo to omni. e.g:
 						{
@@ -221,7 +227,7 @@ def send_omni_message(payload):
 					Returns:
 					  The sucess of error from the request made to omni
 		"""
-	request_endpoint = omni_link + ':' + omni_port + '/api/message'
+	request_endpoint = omni_link + ':' + omni_port + '/api/message/active'
 	response = requests.post(
 		request_endpoint,
 		data=json.dumps(payload),
