@@ -9,7 +9,7 @@ import json
 import logging
 
 # Number used on Hermes
-recipient = 558588886522
+recipient = 558598063953
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', level=logging.DEBUG,
 					filename="logs/" + str(recipient) + '_hermes_integration.log',
