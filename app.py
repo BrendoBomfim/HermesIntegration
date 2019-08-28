@@ -20,7 +20,7 @@ app = Flask(__name__)
 # Hermes credentials
 api_username = "scio"
 api_password = "Sc1o"
-media_id = "ffbff03b-d193-45ac-a28c-625568e9cd86"
+media_id = "f06e00c2-a552-49fe-995d-32a7b911dcac"
 
 omni_link = "http://localhost"
 omni_port = "3000"
