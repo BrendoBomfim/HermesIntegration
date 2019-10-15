@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import base64
 import requests
 import time
@@ -7,13 +8,27 @@ from pymessenger.bot import Bot
 import upload_files
 import json
 import logging
+import os
 
 # Number used on Hermes
 recipient = 558598063953
+logs_path = os.getcwd() + '/logs/'
+log_name = logs_path + str(recipient) + '_hermes_integration.log'
+files_path = os.getcwd() + '/files/'
+
+try:
+    os.makedirs(logs_path)
+except FileExistsError:
+    pass
+
+try:
+    os.makedirs(files_path)
+except FileExistsError:
+    pass
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', level=logging.DEBUG,
-					filename="logs/" + str(recipient) + '_hermes_integration.log',
-					filemode='w', datefmt='%d/%m/%Y %H:%M:%S')
+					filename=log_name, datefmt='%d/%m/%Y %H:%M:%S')
+				
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
