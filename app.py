@@ -3,13 +3,12 @@ import base64
 import requests
 import time
 import datetime as dt
-from flask import Flask, request, make_response, jsonify
+from flask import Flask, request, jsonify
 from pymessenger.bot import Bot
 import upload_files
 import json
 import logging
 import os
-import pprint
 
 
 # Number used on Hermes
@@ -194,12 +193,10 @@ def on_omni_message():
 	req_data = request.get_json()
 
 	if isinstance(req_data, list):
-		print(f"req_data: {req_data}")
 		return send_hsm_campaign(req_data)
 	elif req_data.get('media_type'):
 		return send_attachment_message(req_data)
 	elif req_data.get('message'):
-		print(f"req_data.get('message'): {req_data.get('message')}")
 		return send_hsm_message(req_data)
 	else:
 		return send_text_message(req_data)
@@ -326,7 +323,7 @@ def send_hsm_campaign(omni_messages):
 
 	logger.debug(f"send_hsm_campaign -> responses: {responses}")
 
-	return make_response(jsonify(responses))
+	return jsonify(responses)
 
 
 def send_attachment_message(omni_message):

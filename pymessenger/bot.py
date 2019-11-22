@@ -38,8 +38,6 @@ class Bot(object):
             data=json.dumps(payload, cls=AttrsEncoder),
             headers={'Content-Type': 'application/json',
                      'Authorization': self.auth_args})
-        #print(response.json())
-        #result = flask.jsonify(response.json())
         result = response.json()
 
         return result
