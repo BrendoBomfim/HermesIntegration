@@ -40,6 +40,7 @@ media_id = "f06e00c2-a552-49fe-995d-32a7b911dcac"
 
 omni_link = "http://localhost"
 omni_port = "3000"
+omni_token = "Bearer " + "ACCESS_TOKEN"
 
 bot = Bot(api_username, api_password)
 
@@ -91,10 +92,51 @@ def receive_message():
 				"status": "delivered",
 				"timestamp": "1557865064",
 				"recipient_id": "558596361001",
-				"id": "7318b99d-8813-45b1-a7ed-5cb4265da49b"
+				"id": "cf49249f-970c-4fa4-b7f5-0def3788ea3a"
 			}
 		]
-
+		Or
+		{
+			"statuses": [
+				{
+					"timestamp": "1575034320",
+					"status": "sent",
+					"recipient_id": "558596361001",
+					"id": "3dcfcb97-c826-446a-82d7-9d97ba23b4f7"
+				}
+			],
+			"media_id": "f06e00c2-a552-49fe-995d-32a7b911dcac"
+		}
+		status can be: sent, delivered and read
+		{
+    "statuses": [
+        {
+            "timestamp": "1575055021",
+            "status": "delivered",
+            "recipient_id": "558596361001",
+            "id": "d222362a-03c6-46df-bad9-f1fb73de6c83"
+        }
+    ],
+    "media_id": "f06e00c2-a552-49fe-995d-32a7b911dcac"
+}
+		Or
+		{
+			"statuses": [
+				{
+					"errors": {
+						"contact": {
+							"input": "+5585996361002",
+							"status": "invalid"
+						}
+					},
+					"id": "4ae63a31-0c0a-4a98-966d-ce5b570e7919",
+					"recipient_id": "+5585996361002",
+					"status": "failed",
+					"timestamp": "1575034319"
+				}
+			],
+			"media_id": "f06e00c2-a552-49fe-995d-32a7b911dcac"
+		}
 		Returns:
 		  The sucess of error from omni request
 	"""
@@ -103,6 +145,7 @@ def receive_message():
 	req_data = request.get_json()
 	epoch_now = time.time()
 	frmt_date = dt.datetime.utcfromtimestamp(epoch_now).strftime("%Y/%m/%d %H:%M")
+	logger.debug(f"req_data: {req_data}" )
 	if req_data.get('messages'):
 		messages = req_data["messages"]
 		for message in messages:
@@ -147,22 +190,28 @@ def receive_message():
 	elif "statuses" in req_data:
 		statuses = req_data["statuses"]
 		for status in statuses:
-			payload = {'status': status.get('status'), 'id': status.get('id')}
+
+			logger.debug(f"received status: {payload}")
+
+			if "errors" in status:
+				payload = {'errors': status.get('errors').get('contact').get('status'), 'status': status.get('status'), 'id': status.get('id')}
+			else:
+				payload = {'status': status.get('status'), 'id': status.get('id')}
 
 			logger.debug(f"receive_message -> message -> statuses -> payload: {payload}")
 
-			response = send_omni_status(payload)
+			#response = send_omni_status(payload)
 
-			logger.debug(f"receive_message -> message -> statuses -> response: {response}")
+			#logger.debug(f"receive_message -> message -> statuses -> response: {response}")
 
 	elif "media_id" in req_data:
 		payload = {'status': req_data.get('contacts').get('status'), 'id': req_data.get('contacts').get('msg_id')}
 
 		logger.debug(f"receive_message -> message -> media_id -> payload: {payload}")
 
-		response = send_omni_status(payload)
+		#response = send_omni_status(payload)
 
-		logger.debug(f"receive_message -> message -> media_id -> response: {response}")
+		#logger.debug(f"receive_message -> message -> media_id -> response: {response}")
 		
 	else:
 		logger.info("Not handled")
@@ -191,7 +240,7 @@ def on_omni_message():
 			  The sucess of error from omni request
 		"""
 	req_data = request.get_json()
-
+	print('req_data 1', req_data)
 	if isinstance(req_data, list):
 		return send_hsm_campaign(req_data)
 	elif req_data.get('media_type'):
@@ -275,11 +324,13 @@ def send_omni_status(payload):
 	response = requests.post(
 		request_endpoint,
 		data=json.dumps(payload),
-		headers={'Content-Type': 'application/json'})
+		headers={'Content-Type': 'application/json',
+				 'Authorization': omni_token})
 	return response.content
 
 
 def send_text_message(omni_message):
+	print(omni_message)
 	message = json.loads('{}')
 	message["message"] = {}
 	message["message"].update({"to": format_phone(omni_message["recipient"]),
@@ -290,7 +341,7 @@ def send_text_message(omni_message):
 
 	logger.debug(f"send_text_message -> message: {message}")
 
-	response = bot.send_raw(message)
+	response = jsonify(bot.send_raw(message))
 
 	logger.debug(f"send_text_message -> response: {response}")
 
@@ -329,29 +380,24 @@ def send_hsm_campaign(omni_messages):
 def send_attachment_message(omni_message):
 	message = json.loads('{}')
 	message["message"] = {}
-	type = get_type(omni_message["media_type"])
-	# Save the file locally before uploading and return the path to the file
-	path = upload_files.save_get_file(omni_message["content"], omni_message["media_name"])
-	# Uses the path to make a upload on google drive and gets the public utl
-	url = upload_files.upload_file(path, omni_message["media_type"])
 
 	message["message"].update({"to": format_phone(omni_message["recipient"]),
-							   "type": type,
+							   "type": omni_message["type"],
 							   "content_type": omni_message["media_type"],
 							   "media_id": media_id,
-							   "url": url,
+							   "url": omni_message["url"],
 							   "caption": omni_message["media_name"],
 							   "recipient_type": "individual"})
 	if "caption" in omni_message:
 		message["message"].update({"caption": omni_message["caption"]})
 
 	logger.debug(f"send_attachment_message -> message: {message}")
-
+	print('message', message)
 	response = bot.send_raw(message)
 
 	logger.debug(f"send_attachment_message -> response: {response}")
-
-	return response
+	print('response', response)
+	return jsonify(response)
 
 
 def get_type(myme):
